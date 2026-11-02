@@ -1,0 +1,1 @@
+# HADA_Content_Studio_Template_Sample
