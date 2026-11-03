@@ -1,0 +1,31 @@
+schema_version: 0.1.0
+id: content-studio-feature-tour
+title: Content Studio機能ガイド
+domain: creative-workflow
+tags:
+- infographic
+- template-guide
+- sample
+purpose: HADA Content Studio 0.1.0の機能と安全な画像運用を一枚の図で説明する。
+audience: 日本語でテンプレートを検討する制作者
+scope:
+  includes:
+  - ミニプロジェクト
+  - 根拠つき知識
+  - キャラと共有アイテム
+  - プロンプト履歴
+  - 画像の保護と書き出し
+  excludes:
+  - 外部サービスへの自動投稿
+  - このSampleの公開承認
+  - ストーリー連続性管理の実装
+visibility: internal
+status: active
+knowledge_refs:
+- studio-feature-map
+character_refs:
+- cute-elf-girl
+item_refs:
+- scholar-uniform
+production_refs:
+- content-studio-capabilities

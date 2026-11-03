@@ -1,0 +1,15 @@
+---
+schema_version: 0.1.0
+id: elf-chibi-gen-v2
+asset_id: cute-elf-chibi
+asset_version: 0.2.0
+work_id: content-studio-capabilities
+work_kind: infographic
+prompt_resolution_id: elf-chibi-prompt-v2
+provider: OpenAI ImageGen via Codex session
+generated_at: '2026-11-02T18:59:56+00:00'
+source_path: assets/masters/cute-elf-chibi/0.2.0/source.png
+source_sha256: sha256:460613b402aab58e977f8d7f79b1bd217a267a93ae24797694054e94a5385ed2
+disposition: accepted
+reviewer: Codex local Sample assembly; human publication review pending
+reviewed_at: '2026-11-02T19:00:34+00:00'

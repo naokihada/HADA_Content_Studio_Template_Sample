@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "hada-content-studio://schemas/content/records/0.1.0",
+  "title": "HADA Content Studio records",
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{1,95}$" },
+    "mini_project": {
+      "type": "object",
+      "required": ["schema_version", "id", "title", "domain", "purpose", "audience", "scope", "visibility", "status"],
+      "properties": {
+        "schema_version": { "const": "0.1.0" },
+        "id": { "$ref": "#/$defs/id" },
+        "title": { "type": "string", "minLength": 1 },
+        "domain": { "type": "string", "minLength": 1 },
+        "tags": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "purpose": { "type": "string", "minLength": 1 },
+        "audience": { "type": "string", "minLength": 1 },
+        "scope": { "type": "object", "required": ["includes", "excludes"], "properties": { "includes": { "type": "array", "items": { "type": "string" } }, "excludes": { "type": "array", "items": { "type": "string" } } }, "additionalProperties": false },
+        "visibility": { "enum": ["private", "internal", "public_safe"] },
+        "status": { "enum": ["draft", "active", "paused", "archived"] },
+        "knowledge_refs": { "type": "array", "items": { "$ref": "#/$defs/id" }, "uniqueItems": true },
+        "character_refs": { "type": "array", "items": { "$ref": "#/$defs/id" }, "uniqueItems": true },
+        "item_refs": { "type": "array", "items": { "$ref": "#/$defs/id" }, "uniqueItems": true },
+        "production_refs": { "type": "array", "items": { "$ref": "#/$defs/id" }, "uniqueItems": true },
+        "extensions": { "type": "object" }
+      },
+      "additionalProperties": false
+    },
+    "knowledge_module": {
+      "type": "object",
+      "required": ["schema_version", "id", "title", "kind", "scope", "status", "claims"],
+      "properties": {
+        "schema_version": { "const": "0.1.0" },
+        "id": { "$ref": "#/$defs/id" },
+        "title": { "type": "string", "minLength": 1 },
+        "kind": { "enum": ["principle", "fact-set", "skill", "procedure", "lesson", "reference"] },
+        "scope": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "status": { "enum": ["draft", "review", "approved", "superseded", "archived"] },
+        "claims": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "kind", "text"],
+            "properties": {
+              "id": { "$ref": "#/$defs/id" },
+              "kind": { "enum": ["source_fact", "user_experience", "user_decision", "inference", "proposal"] },
+              "text": { "type": "string", "minLength": 1 },
+              "source_refs": { "type": "array", "items": { "$ref": "#/$defs/id" } },
+              "verification": { "enum": ["unverified", "checked", "approved"] }
+            },
+            "additionalProperties": false
+          }
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "locator", "rights"],
+            "properties": {
+              "id": { "$ref": "#/$defs/id" },
+              "locator": { "type": "string", "minLength": 1 },
+              "retrieved_at": { "type": "string" },
+              "relevant_location": { "type": "string" },
+              "rights": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "extensions": { "type": "object" }
+      },
+      "additionalProperties": false
+    },
+    "infographic_production": {
+      "type": "object",
+      "required": ["schema_version", "id", "project_id", "title", "status", "profile_id", "knowledge_refs"],
+      "properties": {
+        "schema_version": { "const": "0.1.0" },
+        "id": { "$ref": "#/$defs/id" },
+        "project_id": { "$ref": "#/$defs/id" },
+        "title": { "type": "string", "minLength": 1 },
+        "status": { "enum": ["draft", "review", "approved", "published", "archived"] },
+        "profile_id": { "$ref": "#/$defs/id" },
+        "knowledge_refs": { "type": "array", "items": { "$ref": "#/$defs/id" }, "uniqueItems": true },
+        "character_refs": { "type": "array", "items": { "$ref": "#/$defs/id" }, "uniqueItems": true },
+        "item_refs": { "type": "array", "items": { "$ref": "#/$defs/id" }, "uniqueItems": true },
+        "asset_refs": { "type": "array", "items": { "$ref": "#/$defs/id" }, "uniqueItems": true },
+        "extensions": { "type": "object" }
+      },
+      "additionalProperties": false
+    },
+    "publication_record": {
+      "type": "object",
+      "required": ["schema_version", "id", "production_id", "asset_id", "derivative_id", "derivative_path", "destination", "published_at", "derivative_sha256", "profile_version"],
+      "properties": {
+        "schema_version": { "const": "0.1.0" },
+        "id": { "$ref": "#/$defs/id" },
+        "production_id": { "$ref": "#/$defs/id" },
+        "asset_id": { "$ref": "#/$defs/id" },
+        "derivative_id": { "$ref": "#/$defs/id" },
+        "derivative_path": { "type": "string", "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$)).+" },
+        "destination": { "type": "string", "minLength": 1 },
+        "public_url": { "type": "string" },
+        "published_at": { "type": "string", "minLength": 1 },
+        "derivative_sha256": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+        "profile_version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        "extensions": { "type": "object" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

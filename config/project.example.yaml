@@ -1,0 +1,15 @@
+schema_version: "0.1.0"
+id: example-mini-project
+title: Example Mini Project
+domain: education
+purpose: "Describe the intended learning or communication outcome."
+audience: "Describe the intended audience without assuming demographic facts."
+scope:
+  includes: []
+  excludes: []
+visibility: private
+status: draft
+knowledge_refs: []
+character_refs: []
+item_refs: []
+production_refs: []

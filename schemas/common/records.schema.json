@@ -1,0 +1,259 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "hada-content-studio://schemas/common/records/0.1.0",
+  "title": "HADA Studio shared records",
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{1,95}$"
+    },
+    "asset_ref": {
+      "type": "object",
+      "required": ["asset_id", "version", "path", "sha256", "role", "visibility"],
+      "properties": {
+        "asset_id": { "$ref": "#/$defs/id" },
+        "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        "path": { "type": "string", "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$)).+" },
+        "sha256": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+        "role": { "type": "string", "minLength": 1 },
+        "visibility": { "enum": ["private", "internal", "public_safe"] },
+        "origin": { "enum": ["generated", "user", "external", "licensed", "public_domain"] },
+        "rights": { "type": "object" },
+        "extensions": { "type": "object" }
+      },
+      "additionalProperties": false
+    },
+    "prompt_layer_ref": {
+      "type": "object",
+      "required": ["group", "id", "version", "path", "sha256"],
+      "properties": {
+        "group": { "enum": ["shared", "domain", "medium", "project", "entity", "request"] },
+        "id": { "$ref": "#/$defs/id" },
+        "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        "path": { "type": "string", "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$)).+" },
+        "sha256": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" }
+      },
+      "additionalProperties": false
+    },
+    "prompt_resolution": {
+      "type": "object",
+      "required": ["schema_version", "id", "work_id", "work_kind", "status", "profile_id", "profile_version", "profile_path", "profile_sha256", "values_path", "values_sha256", "layers", "substitutions", "exact_prompt", "prompt_sha256"],
+      "properties": {
+        "schema_version": { "const": "0.1.0" },
+        "id": { "$ref": "#/$defs/id" },
+        "work_id": { "$ref": "#/$defs/id" },
+        "work_kind": { "type": "string", "minLength": 1 },
+        "status": { "enum": ["resolved", "superseded"] },
+        "profile_id": { "$ref": "#/$defs/id" },
+        "profile_version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        "profile_path": { "type": "string", "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$)).+" },
+        "profile_sha256": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+        "values_path": { "type": "string", "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$)).+" },
+        "values_sha256": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+        "layers": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/prompt_layer_ref" } },
+        "substitutions": { "type": "object", "additionalProperties": { "type": "string" } },
+        "exact_prompt": { "type": "string", "minLength": 1 },
+        "prompt_sha256": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+        "reference_assets": { "type": "array", "items": { "$ref": "#/$defs/asset_ref" } },
+        "extensions": { "type": "object" }
+      },
+      "additionalProperties": false
+    },
+    "image_generation": {
+      "type": "object",
+      "required": ["schema_version", "id", "asset_id", "asset_version", "work_id", "work_kind", "prompt_resolution_id", "provider", "generated_at", "source_path", "source_sha256", "disposition", "reviewer", "reviewed_at"],
+      "properties": {
+        "schema_version": { "const": "0.1.0" },
+        "id": { "$ref": "#/$defs/id" },
+        "asset_id": { "$ref": "#/$defs/id" },
+        "asset_version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        "work_id": { "$ref": "#/$defs/id" },
+        "work_kind": { "type": "string", "minLength": 1 },
+        "prompt_resolution_id": { "$ref": "#/$defs/id" },
+        "provider": { "type": "string", "minLength": 1 },
+        "model": { "type": "string" },
+        "provider_job_id": { "type": "string" },
+        "generated_at": { "type": "string", "minLength": 1 },
+        "source_path": { "type": "string", "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$)).+" },
+        "source_sha256": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+        "disposition": { "enum": ["accepted", "discard_candidate"] },
+        "reviewer": { "type": "string", "minLength": 1 },
+        "reviewed_at": { "type": "string", "minLength": 1 },
+        "supersedes_generation_id": { "$ref": "#/$defs/id" },
+        "extensions": { "type": "object" }
+      },
+      "additionalProperties": false
+    },
+    "image_derivative": {
+      "type": "object",
+      "required": ["schema_version", "id", "asset_id", "generation_id", "work_id", "work_kind", "source_path", "source_sha256", "profile_id", "profile_version", "profile_path", "profile_sha256", "logo_path", "logo_sha256", "output_path", "output_sha256", "output_format", "width", "height", "resized", "watermarked", "metadata_scan", "metadata_findings", "toolchain", "status"],
+      "properties": {
+        "schema_version": { "const": "0.1.0" },
+        "id": { "$ref": "#/$defs/id" },
+        "asset_id": { "$ref": "#/$defs/id" },
+        "generation_id": { "$ref": "#/$defs/id" },
+        "work_id": { "$ref": "#/$defs/id" },
+        "work_kind": { "type": "string", "minLength": 1 },
+        "source_path": { "type": "string", "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$)).+" },
+        "source_sha256": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+        "profile_id": { "$ref": "#/$defs/id" },
+        "profile_version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        "profile_path": { "type": "string", "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$)).+" },
+        "profile_sha256": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+        "logo_path": { "type": "string", "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$)).+" },
+        "logo_sha256": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+        "output_path": { "type": "string", "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$)).+" },
+        "output_sha256": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+        "output_format": { "enum": ["PNG", "JPEG"] },
+        "width": { "type": "integer", "minimum": 1 },
+        "height": { "type": "integer", "minimum": 1 },
+        "resized": { "type": "boolean" },
+        "watermarked": { "const": true },
+        "metadata_scan": { "enum": ["pass", "fail"] },
+        "metadata_findings": { "type": "array", "items": { "type": "string" } },
+        "toolchain": {
+          "type": "object",
+          "required": ["python", "pillow"],
+          "properties": { "python": { "type": "string" }, "pillow": { "type": "string" } },
+          "additionalProperties": false
+        },
+        "status": { "enum": ["ready_for_human_review", "blocked"] },
+        "extensions": { "type": "object" }
+      },
+      "additionalProperties": false
+    },
+    "character": {
+      "type": "object",
+      "required": ["schema_version", "id", "display_name", "status", "identity"],
+      "properties": {
+        "schema_version": { "const": "0.1.0" },
+        "id": { "$ref": "#/$defs/id" },
+        "display_name": { "type": "string", "minLength": 1 },
+        "aliases": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "status": { "enum": ["draft", "review", "approved", "archived", "superseded"] },
+        "identity": {
+          "type": "object",
+          "required": ["summary", "anchors"],
+          "properties": {
+            "summary": { "type": "string", "minLength": 1 },
+            "anchors": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+            "invariants": { "type": "array", "items": { "type": "string" } },
+            "flexible_traits": { "type": "array", "items": { "type": "string" } }
+          },
+          "additionalProperties": false
+        },
+        "reference_assets": { "type": "array", "items": { "$ref": "#/$defs/asset_ref" } },
+        "provenance": { "type": "object" },
+        "extensions": { "type": "object" }
+      },
+      "additionalProperties": false
+    },
+    "appearance_variant": {
+      "type": "object",
+      "required": ["schema_version", "id", "character_id", "name", "transforms", "status"],
+      "properties": {
+        "schema_version": { "const": "0.1.0" },
+        "id": { "$ref": "#/$defs/id" },
+        "character_id": { "$ref": "#/$defs/id" },
+        "name": { "type": "string", "minLength": 1 },
+        "transforms": {
+          "type": "object",
+          "properties": {
+            "style_id": { "type": "string" },
+            "proportion_id": { "type": "string" },
+            "head_to_body_ratio": { "type": "number", "exclusiveMinimum": 0 },
+            "adjustments": { "type": "object" }
+          },
+          "additionalProperties": true
+        },
+        "preserved_identity_anchors": { "type": "array", "items": { "type": "string" } },
+        "outfit_id": { "$ref": "#/$defs/id" },
+        "reference_assets": { "type": "array", "items": { "$ref": "#/$defs/asset_ref" } },
+        "status": { "enum": ["draft", "review", "approved", "archived", "superseded"] },
+        "extensions": { "type": "object" }
+      },
+      "additionalProperties": false
+    },
+    "item": {
+      "type": "object",
+      "required": ["schema_version", "id", "display_name", "category", "status"],
+      "properties": {
+        "schema_version": { "const": "0.1.0" },
+        "id": { "$ref": "#/$defs/id" },
+        "display_name": { "type": "string", "minLength": 1 },
+        "category": { "enum": ["clothing", "vehicle", "weapon", "accessory", "prop", "other"] },
+        "description": { "type": "string" },
+        "status": { "enum": ["draft", "review", "approved", "archived", "superseded"] },
+        "traits": { "type": "object" },
+        "components": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["item_id", "role"],
+            "properties": { "item_id": { "$ref": "#/$defs/id" }, "role": { "type": "string" } },
+            "additionalProperties": false
+          }
+        },
+        "reference_assets": { "type": "array", "items": { "$ref": "#/$defs/asset_ref" } },
+        "rights": { "type": "object" },
+        "extensions": { "type": "object" }
+      },
+      "additionalProperties": false
+    },
+    "item_variant": {
+      "type": "object",
+      "required": ["schema_version", "id", "item_id", "name", "status"],
+      "properties": {
+        "schema_version": { "const": "0.1.0" },
+        "id": { "$ref": "#/$defs/id" },
+        "item_id": { "$ref": "#/$defs/id" },
+        "name": { "type": "string", "minLength": 1 },
+        "modifications": { "type": "object" },
+        "reference_assets": { "type": "array", "items": { "$ref": "#/$defs/asset_ref" } },
+        "status": { "enum": ["draft", "review", "approved", "archived", "superseded"] },
+        "extensions": { "type": "object" }
+      },
+      "additionalProperties": false
+    },
+    "character_item_link": {
+      "type": "object",
+      "required": ["schema_version", "id", "character_id", "item_id", "relationship", "status"],
+      "properties": {
+        "schema_version": { "const": "0.1.0" },
+        "id": { "$ref": "#/$defs/id" },
+        "character_id": { "$ref": "#/$defs/id" },
+        "item_id": { "$ref": "#/$defs/id" },
+        "relationship": { "enum": ["wears", "rides", "wields", "owns", "associated"] },
+        "character_variant_id": { "$ref": "#/$defs/id" },
+        "item_variant_id": { "$ref": "#/$defs/id" },
+        "outfit_id": { "$ref": "#/$defs/id" },
+        "context": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "status": { "enum": ["draft", "review", "approved", "archived", "superseded"] },
+        "extensions": { "type": "object" }
+      },
+      "additionalProperties": false
+    },
+    "outfit": {
+      "type": "object",
+      "required": ["schema_version", "id", "display_name", "items", "status"],
+      "properties": {
+        "schema_version": { "const": "0.1.0" },
+        "id": { "$ref": "#/$defs/id" },
+        "display_name": { "type": "string", "minLength": 1 },
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["item_id", "slot"],
+            "properties": { "item_id": { "$ref": "#/$defs/id" }, "item_variant_id": { "$ref": "#/$defs/id" }, "slot": { "type": "string" } },
+            "additionalProperties": false
+          }
+        },
+        "status": { "enum": ["draft", "review", "approved", "archived", "superseded"] },
+        "extensions": { "type": "object" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

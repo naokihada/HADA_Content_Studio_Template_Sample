@@ -1,0 +1,28 @@
+schema_version: 0.1.0
+id: cute-elf-girl-chibi
+character_id: cute-elf-girl
+name: ちびキャラ
+transforms:
+  style_id: soft-anime
+  proportion_id: chibi
+  head_to_body_ratio: 2.5
+  adjustments:
+    body_height: 約2.5頭身
+    pose: 歓迎するポーズ
+preserved_identity_anchors:
+- 左右に長い尖った耳
+- エメラルド色の瞳
+- ミント色の筋が入った長い蜂蜜色の髪
+- 葉の髪飾り
+- 青緑のケープと生成り色の服
+status: review
+reference_assets:
+- asset_id: cute-elf-chibi
+  version: 0.2.0
+  path: assets/masters/cute-elf-chibi/0.2.0/source.png
+  sha256: sha256:460613b402aab58e977f8d7f79b1bd217a267a93ae24797694054e94a5385ed2
+  role: appearance_reference
+  visibility: private
+  origin: generated
+  rights:
+    usage: local fictional Sample only; not for external publication

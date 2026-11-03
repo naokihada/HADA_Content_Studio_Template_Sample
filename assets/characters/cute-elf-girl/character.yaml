@@ -1,0 +1,45 @@
+schema_version: 0.1.0
+id: cute-elf-girl
+display_name: Cute Elf Girl
+aliases:
+- 葉の髪飾りのエルフ
+status: review
+identity:
+  summary: 高校生以上の読者向けに作った、親しみやすい架空の成人エルフ学者。表情や頭身を変えても同じ人物として見分けられる。
+  anchors:
+  - 左右に長い尖った耳
+  - エメラルド色の瞳
+  - ミント色の筋が入った長い蜂蜜色の髪
+  - 葉の髪飾り
+  - 青緑の短いケープと生成り色のハイネック
+  invariants:
+  - 顔立ち、瞳、髪色、耳、葉の髪飾りを保つ
+  - 穏やかで知的な雰囲気を保つ
+  flexible_traits:
+  - 頭身
+  - ポーズ
+  - 背景
+  - 画風
+  - 小物の配置
+reference_assets:
+- asset_id: cute-elf-fullbody
+  version: 0.1.0
+  path: assets/masters/cute-elf-fullbody/0.1.0/source.png
+  sha256: sha256:8e4238f6723c16b566e0c7430abde86c41363de9e58bb6e1dc52fa27c0bbd662
+  role: canonical_reference
+  visibility: private
+  origin: generated
+  rights:
+    usage: local fictional Sample only; not for external publication
+provenance:
+  created_for: ローカルのContent Studio機能説明用サンプル
+  prompt_resolution_ids:
+  - elf-fullbody-prompt-v1
+  - elf-chibi-prompt-v1
+  generation_ids:
+  - elf-fullbody-gen-v1
+  - elf-chibi-gen-v1
+  human_visual_review: 要確認。ここでのacceptedはサンプル保管対象としての選定を示し、外部公開承認ではない。
+extensions:
+  story:
+    compatibility_note: 共有character IDをStory系テンプレでも参照できる例。物語固有の連続性データは含めない。

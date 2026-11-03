@@ -1,0 +1,15 @@
+---
+schema_version: 0.1.0
+id: elf-fullbody-gen-v1
+asset_id: cute-elf-fullbody
+asset_version: 0.1.0
+work_id: content-studio-capabilities
+work_kind: infographic
+prompt_resolution_id: elf-fullbody-prompt-v1
+provider: OpenAI ImageGen via Codex session
+generated_at: '2026-11-02T18:49:26+00:00'
+source_path: assets/masters/cute-elf-fullbody/0.1.0/source.png
+source_sha256: sha256:8e4238f6723c16b566e0c7430abde86c41363de9e58bb6e1dc52fa27c0bbd662
+disposition: accepted
+reviewer: Codex local Sample assembly; human publication review pending
+reviewed_at: '2026-11-02T18:58:10+00:00'

@@ -1,0 +1,6 @@
+variables:
+  domain: "[project domain]"
+  topic: "[specific topic]"
+  audience: "[intended audience]"
+  central_message: "[one-sentence communication goal]"
+reference_assets: []

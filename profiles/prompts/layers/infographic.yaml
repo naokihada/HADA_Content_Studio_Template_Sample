@@ -1,0 +1,7 @@
+id: infographic-layout
+version: "0.1.0"
+prompt: >-
+  Design one infographic with a clear reading order, concise labels, legible hierarchy,
+  and purposeful visual grouping. Preserve the requested language and keep every label
+  faithful to the supplied content. Avoid decorative detail that competes with the
+  central message.

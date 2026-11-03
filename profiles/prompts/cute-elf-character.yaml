@@ -1,0 +1,8 @@
+schema_version: 0.1.0
+id: cute-elf-character
+version: 0.1.0
+layers:
+  shared:
+  - profiles/prompts/layers/shared.yaml
+  domain:
+  - profiles/prompts/layers/domain-general.yaml

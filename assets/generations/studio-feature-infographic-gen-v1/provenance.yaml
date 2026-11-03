@@ -1,0 +1,16 @@
+---
+schema_version: 0.1.0
+id: studio-feature-infographic-gen-v1
+asset_id: content-studio-feature-guide
+asset_version: 0.1.0
+work_id: content-studio-capabilities
+work_kind: infographic
+prompt_resolution_id: studio-feature-prompt-v1
+provider: Python deterministic local renderer
+generated_at: '2026-11-02T19:01:30+00:00'
+source_path: assets/masters/content-studio-feature-guide/0.1.0/source.png
+source_sha256: sha256:39d316501206d909f27f7488b946564ef5a9aa50fa32744035e22d6716ee1dba
+disposition: accepted
+reviewer: Codex local Sample assembly; human publication review pending
+reviewed_at: '2026-11-02T19:01:45+00:00'
+model: Pillow 11.0.0

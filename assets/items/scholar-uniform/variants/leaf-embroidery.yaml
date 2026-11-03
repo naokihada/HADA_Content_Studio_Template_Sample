@@ -1,0 +1,8 @@
+schema_version: 0.1.0
+id: scholar-uniform-leaf-embroidery
+item_id: scholar-uniform
+name: 葉の刺繍
+modifications:
+  cloak_trim: 小さな金色の葉模様
+reference_assets: []
+status: review

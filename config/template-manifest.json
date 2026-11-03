@@ -1,0 +1,78 @@
+{
+  "manifest_version": "1.0.0",
+  "template": {
+    "id": "hada-content-studio-template",
+    "name": "HADA Content Studio Template",
+    "version": "0.1.0"
+  },
+  "base_compatibility": {
+    "template_id": "hada-base-template",
+    "minimum_version": "0.1.0",
+    "tested_version": "0.1.0"
+  },
+  "compatibility": {
+    "schema_version": "0.1.0",
+    "data_format_version": "0.1.0"
+  },
+  "repositories": {
+    "dev": "HADA_Content_Studio_Template_Dev",
+    "public": "HADA_Content_Studio_Template",
+    "sample": "HADA_Content_Studio_Template_Sample"
+  },
+  "files": {
+    "template_base": "TEMPLATE_BASE.md"
+  },
+  "artifacts": {
+    "role": "sample",
+    "character_instances_allowed": true,
+    "contains_user_data": false,
+    "sample_character_data": true,
+    "sample_character_name": "Cute Elf Girl"
+  },
+  "ownership": {
+    "template_owned": [
+      ".gitattributes",
+      ".gitignore",
+      "AGENTS.md",
+      "README.md",
+      "CHANGELOG.md",
+      "TEMPLATE_BASE.md",
+      "SPEC.md",
+      "ReSPEC.md",
+      "config/template-manifest.json",
+      "config/project.example.yaml",
+      "config/prompt-values.example.yaml",
+      "profiles/exports/**",
+      "schemas/**",
+      "profiles/**",
+      "tools/**",
+      "tests/**",
+      "docs/**",
+      "AI/README.md"
+    ],
+    "user_owned": [
+      "WHY.md",
+      "config/project.yaml",
+      "knowledge/**",
+      "assets/**",
+      "projects/**",
+      "publications/**",
+      "AI/Logs/**"
+    ],
+    "generated": [
+      "build/**",
+      ".cache/**",
+      "__pycache__/**",
+      "*.pyc"
+    ],
+    "reference": [
+      "references/**",
+      "reference_analysis/**"
+    ],
+    "review_required": [
+      "AI/**",
+      "tmp/**",
+      "temp/**"
+    ]
+  }
+}

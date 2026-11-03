@@ -1,0 +1,5 @@
+id: domain-context
+version: "0.1.0"
+prompt: >-
+  Domain: {{domain}}. Topic: {{topic}}. Intended audience: {{audience}}.
+  Central message: {{central_message}}.

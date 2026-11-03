@@ -1,0 +1,24 @@
+variables:
+  domain: クリエイティブ制作の管理
+  topic: HADA Content Studioの0.1.0機能
+  audience: 日本語で制作テンプレートを検討する人
+  central_message: 根拠と画像の安全境界を保ちながら、広いテーマを伝わる一枚に整理する
+reference_assets:
+- asset_id: cute-elf-fullbody
+  version: 0.1.0
+  path: projects/fantasy/content-studio-feature-tour/productions/infographic/exports/cute-elf-fullbody-website.png
+  sha256: sha256:17bff27275cd6269e3a2eb756f86f248d9cd0b0921172575350cb15b4aa80253
+  role: watermarked_layout_reference
+  visibility: internal
+  origin: generated
+  rights:
+    usage: local Sample infographic composition only
+- asset_id: cute-elf-chibi
+  version: 0.2.0
+  path: projects/fantasy/content-studio-feature-tour/productions/infographic/exports/cute-elf-chibi-v2-website.png
+  sha256: sha256:891c42de2c046cf519d93f857a560d583b0fd44c8e021ca56b313d416dc5f2d6
+  role: watermarked_layout_reference
+  visibility: internal
+  origin: generated
+  rights:
+    usage: local Sample infographic composition only

@@ -1,0 +1,22 @@
+schema_version: 0.1.0
+id: cute-elf-soft-cel-style
+character_id: cute-elf-girl
+name: やわらかいセミリアル風
+transforms:
+  style_id: soft-anime-cel-shaded
+preserved_identity_anchors:
+- 尖った耳
+- エメラルドの瞳
+- 蜂蜜色の髪とミント色の筋
+- 葉の髪飾り
+status: review
+reference_assets:
+- asset_id: cute-elf-chibi
+  version: 0.1.0
+  path: assets/masters/cute-elf-chibi/0.1.0/source.png
+  sha256: sha256:d47dffae48e6a862496a853bd6727f13580caa2a8b5038587f3e708b11e207fc
+  role: style_reference
+  visibility: private
+  origin: generated
+  rights:
+    usage: local fictional Sample only; not for external publication

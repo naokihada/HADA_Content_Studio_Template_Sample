@@ -1,0 +1,12 @@
+schema_version: 0.1.0
+id: cute-elf-wears-scholar-uniform
+character_id: cute-elf-girl
+item_id: scholar-uniform
+relationship: wears
+item_variant_id: scholar-uniform-leaf-embroidery
+outfit_id: field-scholar-outfit
+context:
+- Content Studio機能ガイド
+- 通常外見
+- ちびキャラ外見
+status: review

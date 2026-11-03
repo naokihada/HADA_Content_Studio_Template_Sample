@@ -1,0 +1,10 @@
+schema_version: "0.1.0"
+id: infographic-default
+version: "0.1.0"
+layers:
+  shared:
+    - profiles/prompts/layers/shared.yaml
+  domain:
+    - profiles/prompts/layers/domain-general.yaml
+  medium:
+    - profiles/prompts/layers/infographic.yaml

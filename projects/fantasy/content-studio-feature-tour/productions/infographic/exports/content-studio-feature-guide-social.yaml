@@ -1,0 +1,28 @@
+---
+schema_version: 0.1.0
+id: content-studio-feature-guide-social
+asset_id: content-studio-feature-guide
+generation_id: studio-feature-infographic-gen-v1
+work_id: content-studio-capabilities
+work_kind: infographic
+source_path: assets/masters/content-studio-feature-guide/0.1.0/source.png
+source_sha256: sha256:39d316501206d909f27f7488b946564ef5a9aa50fa32744035e22d6716ee1dba
+profile_id: social-small
+profile_version: 0.1.0
+profile_path: profiles/exports/social.example.yaml
+profile_sha256: sha256:528e0f3339c769ed03f6fa4934f899bdaeda0ab8f5ca77c4bd88ab94b58da945
+logo_path: assets/branding/watermark.png
+logo_sha256: sha256:9f7419a71f4889305ecc78f6e40beb73b26c04031c523c7b184963c273582e89
+output_path: projects/fantasy/content-studio-feature-tour/productions/infographic/exports/content-studio-feature-guide-social.jpg
+output_sha256: sha256:e341e5f251a7c2de2fc8ee8adc898acd0b8f6a62e713264d64bea8ada2419ea3
+output_format: JPEG
+width: 497
+height: 720
+resized: true
+watermarked: true
+metadata_scan: pass
+metadata_findings: []
+toolchain:
+  python: 3.10.11
+  pillow: 11.0.0
+status: ready_for_human_review

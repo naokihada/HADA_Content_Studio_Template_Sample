@@ -1,0 +1,15 @@
+schema_version: "0.1.0"
+id: website-watermarked
+version: "0.1.0"
+destination: website
+output_format: PNG
+resize:
+  enabled: false
+watermark:
+  enabled: true
+  logo_path: assets/branding/watermark.png
+  max_width_ratio: 0.16
+  max_height_ratio: 0.18
+  opacity: 0.68
+  margin_px: 18
+  position: bottom-right

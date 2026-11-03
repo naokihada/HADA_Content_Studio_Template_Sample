@@ -1,0 +1,58 @@
+schema_version: 0.1.0
+id: studio-feature-map
+title: Content Studioの機能と運用境界
+kind: reference
+scope:
+- ミニプロジェクト
+- 知識と根拠
+- キャラクターとアイテム
+- プロンプト
+- 画像保護と書き出し
+status: review
+claims:
+- id: claim-mini-projects
+  kind: source_fact
+  text: 高校入試やバイク趣味など、分野ごとのミニプロジェクトを独立した目的・対象・範囲で管理できる。
+  source_refs:
+  - local-spec
+  verification: checked
+- id: claim-evidence
+  kind: source_fact
+  text: 知識モジュールは根拠・出典・検証状態を保持し、複数のミニプロジェクトから参照できる。
+  source_refs:
+  - local-spec
+  verification: checked
+- id: claim-character-item
+  kind: source_fact
+  text: 外見バリエーションは同じcharacter IDを維持し、衣装などのitemはキャラクターから独立して複数キャラクターへリンクできる。
+  source_refs:
+  - local-spec
+  verification: checked
+- id: claim-prompt-history
+  kind: source_fact
+  text: プロンプトは共通・分野・媒体・プロジェクト・エンティティ・今回の指示の層で構成し、解決済み全文と元レイヤーのハッシュを保存できる。
+  source_refs:
+  - local-spec
+  verification: checked
+- id: claim-source-safety
+  kind: source_fact
+  text: 生成原画は非再現性のある保護対象として保持する。外部向け画像はPythonプロファイルで透かし処理とメタデータ検査を通し、人の確認後に利用する。
+  source_refs:
+  - local-spec
+  - local-asset-guide
+  verification: checked
+- id: claim-manual-publication
+  kind: source_fact
+  text: 投稿先・日時は投稿後に記録できる。テンプレートの書き出しツール自体はアップロードを行わない。
+  source_refs:
+  - local-asset-guide
+  verification: checked
+sources:
+- id: local-spec
+  locator: SPEC.md
+  relevant_location: sections 5–11
+  rights: ローカルプロジェクト仕様書。サンプル説明の根拠として使用。
+- id: local-asset-guide
+  locator: docs/ASSET_LIFECYCLE.md
+  relevant_location: sections 1–3
+  rights: ローカルプロジェクト文書。サンプル説明の根拠として使用。

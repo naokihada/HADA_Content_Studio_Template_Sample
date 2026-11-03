@@ -1,0 +1,28 @@
+---
+schema_version: 0.1.0
+id: cute-elf-chibi-website
+asset_id: cute-elf-chibi
+generation_id: elf-chibi-gen-v1
+work_id: content-studio-capabilities
+work_kind: infographic
+source_path: assets/masters/cute-elf-chibi/0.1.0/source.png
+source_sha256: sha256:d47dffae48e6a862496a853bd6727f13580caa2a8b5038587f3e708b11e207fc
+profile_id: website-watermarked
+profile_version: 0.1.0
+profile_path: profiles/exports/website.example.yaml
+profile_sha256: sha256:fa558cb5291d920a604aaedb23047000c1005b63258edaf608a9384ec4b3f2a6
+logo_path: assets/branding/watermark.png
+logo_sha256: sha256:9f7419a71f4889305ecc78f6e40beb73b26c04031c523c7b184963c273582e89
+output_path: projects/fantasy/content-studio-feature-tour/productions/infographic/exports/cute-elf-chibi-website.png
+output_sha256: sha256:b5d54d09005cb1143137c585a09528ef88876476493d0fb6fe4926640a7847ec
+output_format: PNG
+width: 1024
+height: 1536
+resized: false
+watermarked: true
+metadata_scan: pass
+metadata_findings: []
+toolchain:
+  python: 3.10.11
+  pillow: 11.0.0
+status: ready_for_human_review

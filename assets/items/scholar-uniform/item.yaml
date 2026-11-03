@@ -1,0 +1,17 @@
+schema_version: 0.1.0
+id: scholar-uniform
+display_name: 森の学者の制服
+category: clothing
+description: 青緑の短いケープ、生成り色のハイネック、深緑のスカートを組み合わせた共有衣装。
+status: review
+traits:
+  palette:
+  - 青緑
+  - 生成り
+  - 深緑
+  use:
+  - 学習
+  - 案内
+reference_assets: []
+rights:
+  scope: このローカルSampleの架空の衣装

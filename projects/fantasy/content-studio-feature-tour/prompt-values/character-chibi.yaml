@@ -1,0 +1,15 @@
+variables:
+  domain: クリエイティブ制作の管理
+  topic: 同じ人物のちびキャラ外見
+  audience: テンプレートを検討する日本語話者
+  central_message: 頭身を変えてもキャラクターIDと識別点を維持する
+reference_assets:
+- asset_id: cute-elf-fullbody
+  version: 0.1.0
+  path: assets/masters/cute-elf-fullbody/0.1.0/source.png
+  sha256: sha256:8e4238f6723c16b566e0c7430abde86c41363de9e58bb6e1dc52fa27c0bbd662
+  role: identity_reference
+  visibility: private
+  origin: generated
+  rights:
+    usage: local fictional Sample only; not for external publication

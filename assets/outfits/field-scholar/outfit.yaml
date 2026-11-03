@@ -1,0 +1,8 @@
+schema_version: 0.1.0
+id: field-scholar-outfit
+display_name: 森の学者セット
+items:
+- item_id: scholar-uniform
+  item_variant_id: scholar-uniform-leaf-embroidery
+  slot: clothing
+status: review

@@ -1,0 +1,18 @@
+schema_version: 0.1.0
+id: content-studio-capabilities
+project_id: content-studio-feature-tour
+title: 情報を、信頼できる一枚へ
+status: review
+profile_id: infographic-default
+knowledge_refs:
+- studio-feature-map
+character_refs:
+- cute-elf-girl
+item_refs:
+- scholar-uniform
+asset_refs:
+- cute-elf-fullbody
+- cute-elf-chibi
+- content-studio-feature-guide
+extensions:
+  human_review: 未実施。ready_for_human_reviewは機械検査通過を表し、公開承認ではない。
