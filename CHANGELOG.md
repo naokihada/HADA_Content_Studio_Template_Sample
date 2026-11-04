@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1] - 2026-11-03
+
+### Added
+
+- Base 0.1.1 WHY lifecycle rules, a generic purpose-only WHY placeholder, and the
+  append-only reason recorder.
+
 ## [0.1.0] - 2026-11-02
 
 ### Added

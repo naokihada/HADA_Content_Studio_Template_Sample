@@ -106,6 +106,8 @@ def _schema_errors(value: Any, spec: dict[str, Any], root_schema: dict[str, Any]
     if isinstance(value, list):
         if len(value) < spec.get("minItems", 0):
             errors.append(f"{path}: has too few items")
+        if len(value) > spec.get("maxItems", float("inf")):
+            errors.append(f"{path}: has too many items")
         if spec.get("uniqueItems"):
             serialized = [json.dumps(item, sort_keys=True, ensure_ascii=False) for item in value]
             if len(serialized) != len(set(serialized)):
@@ -258,6 +260,252 @@ def _prompt_resolution_errors(root: Path, relative_record_path: str, record: dic
     return errors
 
 
+def _prompt_review_errors(root: Path, record_path: Path, record: dict[str, Any]) -> list[str]:
+    relative_path = record_path.relative_to(root).as_posix()
+    errors: list[str] = []
+    review_id = record.get("id")
+    expected_parts = ["projects", None, None, "productions", "infographic", "prompts", f"{review_id}.prompt-review.yaml"]
+    path_parts = Path(relative_path).parts
+    if len(path_parts) != len(expected_parts) or any(
+        expected is not None and actual != expected for actual, expected in zip(path_parts, expected_parts)
+    ):
+        errors.append(f"{relative_path}: prompt review path must use the project prompts directory and its ID")
+        return errors
+
+    prompt_dir = Path(*path_parts[:-1])
+    expected_brief = (prompt_dir / f"{review_id}.brief.md").as_posix()
+    expected_prompt = (prompt_dir / f"{review_id}.prompt.md").as_posix()
+    if record.get("brief_path") != expected_brief:
+        errors.append(f"{relative_path}: brief_path must be the matching <id>.brief.md file")
+    issue = _checked_file(root, record.get("brief_path"), record.get("brief_sha256"))
+    if issue:
+        errors.append(f"{relative_path}: brief {issue}")
+
+    rubric = record.get("rubric", [])
+    candidates = record.get("candidates", [])
+    rubric_by_id: dict[str, dict[str, Any]] = {}
+    if isinstance(rubric, list):
+        for criterion in rubric:
+            if not isinstance(criterion, dict):
+                continue
+            criterion_id = criterion.get("id")
+            if isinstance(criterion_id, str):
+                if criterion_id in rubric_by_id:
+                    errors.append(f"{relative_path}: duplicate rubric criterion {criterion_id!r}")
+                rubric_by_id[criterion_id] = criterion
+    if sum(item.get("weight", 0) for item in rubric_by_id.values() if isinstance(item.get("weight"), int)) != 100:
+        errors.append(f"{relative_path}: rubric weights must sum to 100")
+    if "instruction_clarity" not in rubric_by_id:
+        errors.append(f"{relative_path}: rubric must include instruction_clarity for tie-breaking")
+
+    candidate_ids: set[str] = set()
+    candidate_by_id: dict[str, dict[str, Any]] = {}
+    model_values: dict[str, set[str]] = {field: set() for field in ("provider", "api_model_id", "displayed_model_name", "reasoning_strength")}
+    candidate_findings: list[set[str]] = []
+    pass_indexes: list[int] = []
+    if not isinstance(candidates, list):
+        candidates = []
+    for index, candidate in enumerate(candidates):
+        if not isinstance(candidate, dict):
+            candidate_findings.append(set())
+            continue
+        candidate_id = candidate.get("id")
+        if not isinstance(candidate_id, str):
+            candidate_findings.append(set())
+            continue
+        if candidate_id in candidate_ids:
+            errors.append(f"{relative_path}: duplicate prompt candidate ID {candidate_id!r}")
+        candidate_ids.add(candidate_id)
+        candidate_by_id[candidate_id] = candidate
+        if candidate.get("number") != index + 1:
+            errors.append(f"{relative_path}: candidate numbers must be consecutive from 1")
+        if index == 0:
+            if candidate.get("revision_of") is not None or candidate.get("addressed_findings") or candidate.get("changes"):
+                errors.append(f"{relative_path}: candidate 1 cannot claim a previous revision")
+        else:
+            previous = candidates[index - 1] if isinstance(candidates[index - 1], dict) else {}
+            if candidate.get("revision_of") != previous.get("id"):
+                errors.append(f"{relative_path}: each revision must reference the immediately preceding candidate")
+
+        prompt_text = candidate.get("exact_prompt")
+        if isinstance(prompt_text, str):
+            digest = "sha256:" + hashlib.sha256(prompt_text.encode("utf-8")).hexdigest()
+            if candidate.get("prompt_sha256") != digest:
+                errors.append(f"{relative_path}: candidate {candidate_id!r} prompt hash mismatch")
+        criteria = candidate.get("criteria", [])
+        criteria_by_id: dict[str, dict[str, Any]] = {}
+        if isinstance(criteria, list):
+            for item in criteria:
+                if not isinstance(item, dict):
+                    continue
+                criterion_id = item.get("criterion_id")
+                if not isinstance(criterion_id, str):
+                    continue
+                if criterion_id in criteria_by_id:
+                    errors.append(f"{relative_path}: candidate {candidate_id!r} repeats criterion {criterion_id!r}")
+                criteria_by_id[criterion_id] = item
+        if set(criteria_by_id) != set(rubric_by_id):
+            errors.append(f"{relative_path}: candidate {candidate_id!r} criteria do not match the fixed rubric")
+        raw_score = 0
+        findings: set[str] = set()
+        for criterion_id, criterion in rubric_by_id.items():
+            scored = criteria_by_id.get(criterion_id)
+            if scored is None:
+                continue
+            weight = criterion.get("weight")
+            points = scored.get("points")
+            if not isinstance(weight, int) or not isinstance(points, int) or points < 0 or points > weight:
+                errors.append(f"{relative_path}: candidate {candidate_id!r} has invalid points for {criterion_id!r}")
+                continue
+            raw_score += points
+            if points < weight:
+                finding_id = scored.get("finding_id")
+                if not isinstance(finding_id, str) or not isinstance(scored.get("finding"), str) or not scored.get("finding", "").strip():
+                    errors.append(f"{relative_path}: candidate {candidate_id!r} must record a finding for {criterion_id!r}")
+                else:
+                    findings.add(finding_id)
+        if candidate.get("raw_score") != raw_score:
+            errors.append(f"{relative_path}: candidate {candidate_id!r} raw_score does not equal criterion points")
+
+        checks = candidate.get("critical_checks", [])
+        check_by_id: dict[str, dict[str, Any]] = {}
+        if isinstance(checks, list):
+            for check in checks:
+                if isinstance(check, dict) and isinstance(check.get("id"), str):
+                    if check["id"] in check_by_id:
+                        errors.append(f"{relative_path}: candidate {candidate_id!r} repeats critical check {check['id']!r}")
+                    check_by_id[check["id"]] = check
+        required_checks = {"factual_accuracy", "explicit_constraints", "contradictions"}
+        if set(check_by_id) != required_checks:
+            errors.append(f"{relative_path}: candidate {candidate_id!r} must record all three critical checks")
+        critical_failed = False
+        for check_id, check in check_by_id.items():
+            if check.get("passed") is not True:
+                critical_failed = True
+                finding_id = check.get("finding_id")
+                if not isinstance(finding_id, str) or not isinstance(check.get("finding"), str) or not check.get("finding", "").strip():
+                    errors.append(f"{relative_path}: failed critical check {check_id!r} must have a finding")
+                else:
+                    findings.add(finding_id)
+        expected_score = min(raw_score, 89) if critical_failed else raw_score
+        if candidate.get("total_score") != expected_score:
+            errors.append(f"{relative_path}: candidate {candidate_id!r} effective score does not match rubric and critical checks")
+        if expected_score >= 90 and not critical_failed:
+            pass_indexes.append(index)
+        candidate_findings.append(findings)
+
+        if index > 0:
+            previous_findings = candidate_findings[index - 1]
+            addressed_values = candidate.get("addressed_findings", [])
+            addressed = {value for value in addressed_values if isinstance(value, str)} if isinstance(addressed_values, list) else set()
+            changes = candidate.get("changes", [])
+            change_ids = {
+                item.get("finding_id") for item in changes
+                if isinstance(item, dict) and isinstance(item.get("finding_id"), str)
+            } if isinstance(changes, list) else set()
+            if addressed != previous_findings or not previous_findings.issubset(change_ids):
+                errors.append(f"{relative_path}: candidate {candidate_id!r} must map every previous finding to a concrete change")
+
+        reviewed_at = candidate.get("reviewed_at")
+        try:
+            timestamp = datetime.fromisoformat(reviewed_at.replace("Z", "+00:00")) if isinstance(reviewed_at, str) else None
+            if timestamp is None or timestamp.tzinfo is None:
+                errors.append(f"{relative_path}: candidate {candidate_id!r} reviewed_at must include a timezone")
+        except ValueError:
+            errors.append(f"{relative_path}: candidate {candidate_id!r} reviewed_at must be ISO-8601")
+        evaluator = candidate.get("evaluator", {})
+        if isinstance(evaluator, dict):
+            for field in model_values:
+                value = evaluator.get(field)
+                if isinstance(value, str) and value.strip().casefold() not in {"unknown", "not_exposed"}:
+                    model_values[field].add(value.strip().casefold())
+
+    model_changed = any(len(values) > 1 for values in model_values.values())
+    observed_evaluator = record.get("observed_evaluator")
+    if isinstance(observed_evaluator, dict):
+        for field, values in model_values.items():
+            observed = observed_evaluator.get(field)
+            if isinstance(observed, str) and observed.strip().casefold() not in {"unknown", "not_exposed"} and values and observed.strip().casefold() not in values:
+                model_changed = True
+    status = record.get("status")
+    completed_statuses = {"selected_pass", "selected_below_threshold"}
+    is_completed = isinstance(status, str) and status in completed_statuses
+    selected_id = record.get("selected_candidate_id")
+    selected = candidate_by_id.get(selected_id) if isinstance(selected_id, str) else None
+    selected_path = record.get("selected_prompt_path")
+    selected_hash = record.get("selected_prompt_sha256")
+    if is_completed:
+        if selected is None:
+            errors.append(f"{relative_path}: completed review must select an existing candidate")
+        if record.get("prompt_resolution_id") is None:
+            errors.append(f"{relative_path}: completed review must link a prompt resolution")
+        if selected_path != expected_prompt or not isinstance(selected_hash, str):
+            errors.append(f"{relative_path}: completed review must select its matching <id>.prompt.md")
+        elif selected is not None:
+            if selected_hash != selected.get("prompt_sha256"):
+                errors.append(f"{relative_path}: selected prompt hash differs from its candidate")
+            issue = _checked_file(root, selected_path)
+            if issue:
+                errors.append(f"{relative_path}: selected prompt {issue}")
+            else:
+                prompt_file = (root / selected_path).resolve()
+                try:
+                    prompt_file_text = prompt_file.read_text(encoding="utf-8")
+                except (OSError, UnicodeError) as exc:
+                    errors.append(f"{relative_path}: selected prompt cannot be read: {exc}")
+                else:
+                    actual_hash = "sha256:" + hashlib.sha256(prompt_file_text.encode("utf-8")).hexdigest()
+                    if prompt_file_text != selected.get("exact_prompt") or actual_hash != selected_hash:
+                        errors.append(f"{relative_path}: selected prompt text/hash differs from the chosen candidate")
+        if model_changed:
+            errors.append(f"{relative_path}: completed review cannot contain an evaluator identity change")
+    elif status == "in_progress":
+        if selected_id is not None or selected_path is not None or selected_hash is not None or record.get("prompt_resolution_id") is not None:
+            errors.append(f"{relative_path}: in-progress review cannot select a prompt or prompt resolution")
+        if pass_indexes:
+            errors.append(f"{relative_path}: in-progress review must stop when a passing candidate is reached")
+        if len(candidates) >= 5:
+            errors.append(f"{relative_path}: five below-threshold candidates require a final selection")
+        if model_changed:
+            errors.append(f"{relative_path}: evaluator change must halt the review")
+    else:
+        if selected_id is not None or selected_path is not None or selected_hash is not None or record.get("prompt_resolution_id") is not None:
+            errors.append(f"{relative_path}: halted review cannot select a prompt or prompt resolution")
+        if not isinstance(record.get("halt_reason"), str) or not record.get("halt_reason", "").strip():
+            errors.append(f"{relative_path}: halted review must record halt_reason")
+        if status == "halted_model_change" and not model_changed:
+            errors.append(f"{relative_path}: halted_model_change requires a changed candidate or observed_evaluator identity")
+
+    if status == "selected_pass":
+        selected_checks = selected.get("critical_checks", []) if selected else []
+        checks_pass = isinstance(selected_checks, list) and all(isinstance(item, dict) and item.get("passed") is True for item in selected_checks)
+        if selected is None or not isinstance(selected.get("total_score"), int) or selected.get("total_score", 0) < 90 or not checks_pass:
+            errors.append(f"{relative_path}: selected_pass requires a score of at least 90 and passing critical checks")
+        elif not candidates or not isinstance(candidates[-1], dict) or candidates[-1].get("id") != selected_id or not pass_indexes or pass_indexes[-1] != len(candidates) - 1:
+            errors.append(f"{relative_path}: review must stop at the first passing candidate")
+    elif status == "selected_below_threshold":
+        if len(candidates) != 5 or pass_indexes:
+            errors.append(f"{relative_path}: below-threshold selection requires five candidates and no passing candidate")
+        elif selected is not None:
+            def selection_key(candidate: dict[str, Any]) -> tuple[int, int, int]:
+                criterion_values = candidate.get("criteria", [])
+                if not isinstance(criterion_values, list):
+                    criterion_values = []
+                clarity_value = next((item.get("points", 0) for item in criterion_values if isinstance(item, dict) and item.get("criterion_id") == "instruction_clarity"), 0)
+                score_value = candidate.get("total_score", -1)
+                assumptions_value = candidate.get("unsupported_assumption_count", 10**9)
+                clarity = clarity_value if isinstance(clarity_value, int) else -1
+                score = score_value if isinstance(score_value, int) else -1
+                assumptions = assumptions_value if isinstance(assumptions_value, int) else 10**9
+                return (score, -assumptions, clarity)
+            valid_candidates = [item for item in candidates if isinstance(item, dict)]
+            if not valid_candidates:
+                errors.append(f"{relative_path}: below-threshold review has no candidate records")
+            elif selection_key(selected) != max(selection_key(item) for item in valid_candidates):
+                errors.append(f"{relative_path}: below-threshold selection does not follow score/assumption/clarity tie-breaks")
+    return errors
+
+
 def _generation_record_errors(root: Path, record_path: Path, record: dict[str, Any]) -> list[str]:
     relative_record_path = record_path.relative_to(root).as_posix()
     errors: list[str] = []
@@ -290,6 +538,24 @@ def _generation_record_errors(root: Path, record_path: Path, record: dict[str, A
             errors.append(f"{relative_record_path}: source format does not match its extension")
     else:
         errors.append(f"{relative_record_path}: image metadata scanner is unavailable")
+    arguments = record.get("generation_arguments")
+    if arguments is not None:
+        if not isinstance(arguments, dict):
+            errors.append(f"{relative_record_path}: generation_arguments must be a mapping")
+        else:
+            arguments_path = arguments.get("source_path")
+            arguments_hash = arguments.get("source_sha256")
+            issue = _checked_file(root, arguments_path, arguments_hash)
+            if issue:
+                errors.append(f"{relative_record_path}: generation arguments {issue}")
+            elif yaml is not None:
+                try:
+                    stored_arguments = yaml.safe_load((root / arguments_path).read_text(encoding="utf-8"))
+                except (OSError, UnicodeError, yaml.YAMLError) as exc:
+                    errors.append(f"{relative_record_path}: cannot reload generation arguments: {exc}")
+                else:
+                    if not isinstance(stored_arguments, dict) or stored_arguments != arguments.get("values"):
+                        errors.append(f"{relative_record_path}: generation arguments differ from their source file")
     return errors
 
 
@@ -431,6 +697,7 @@ def _record_specs(root: Path) -> list[tuple[Path, Path, str]]:
         ("assets/outfits/**/outfit.yaml", CORE_SCHEMA_PATH, "outfit"),
         ("assets/relationships/character_items/*.yaml", CORE_SCHEMA_PATH, "character_item_link"),
         ("projects/**/productions/infographic/prompt_resolutions/*.yaml", CORE_SCHEMA_PATH, "prompt_resolution"),
+        ("projects/**/productions/infographic/prompts/*.prompt-review.yaml", CONTENT_SCHEMA_PATH, "prompt_review"),
         ("assets/generations/*/provenance.yaml", CORE_SCHEMA_PATH, "image_generation"),
         ("projects/**/productions/infographic/exports/*.yaml", CORE_SCHEMA_PATH, "image_derivative"),
         ("knowledge/**/knowledge.yaml", CONTENT_SCHEMA_PATH, "knowledge_module"),
@@ -498,6 +765,11 @@ def validate(root: Path) -> list[str]:
     if role not in {"dev", "template", "sample"}:
         errors.append("artifacts.role must be dev, template, or sample")
 
+    for relative in (Path("WHY.md"), Path("tools/record_why.py")):
+        target = root / relative
+        if target.is_symlink() or not target.is_file():
+            errors.append(f"required WHY lifecycle file is missing or unsafe: {relative.as_posix()}")
+
     if isinstance(version, str):
         template_base = root / "TEMPLATE_BASE.md"
         changelog = root / "CHANGELOG.md"
@@ -525,7 +797,7 @@ def validate(root: Path) -> list[str]:
         except (OSError, UnicodeError, ValueError, RuntimeError, KeyError) as exc:
             errors.append(f"invalid config/project.example.yaml: {exc}")
     records: dict[str, dict[str, dict[str, Any]]] = {
-        name: {} for name in ("character", "appearance_variant", "item", "item_variant", "outfit", "character_item_link", "prompt_resolution", "image_generation", "image_derivative", "knowledge_module", "mini_project", "infographic_production", "publication_record")
+        name: {} for name in ("character", "appearance_variant", "item", "item_variant", "outfit", "character_item_link", "prompt_resolution", "prompt_review", "image_generation", "image_derivative", "knowledge_module", "mini_project", "infographic_production", "publication_record")
     }
     for path, schema_path, name in _record_specs(root):
         if schema_path not in schemas:
@@ -556,6 +828,8 @@ def validate(root: Path) -> list[str]:
                 errors.append(f"{path.relative_to(root).as_posix()}: {issue}")
         if name == "prompt_resolution":
             errors.extend(_prompt_resolution_errors(root, path.relative_to(root).as_posix(), record))
+        elif name == "prompt_review":
+            errors.extend(_prompt_review_errors(root, path, record))
         elif name == "image_generation":
             errors.extend(_generation_record_errors(root, path, record))
 
@@ -567,6 +841,8 @@ def validate(root: Path) -> list[str]:
             errors.append(f"{role} artifact must not contain project image-generation assets")
         if artifacts.get("character_instances_allowed") is not False:
             errors.append(f"{role} manifest must set character_instances_allowed=false")
+    if role == "template" and any(records[name] for name in ("prompt_resolution", "prompt_review", "mini_project", "infographic_production", "knowledge_module", "publication_record")):
+        errors.append("template artifact must not contain private project or prompt records")
     if role == "sample":
         if artifacts.get("character_instances_allowed") is not True:
             errors.append("sample manifest must set character_instances_allowed=true")
@@ -629,6 +905,20 @@ def validate(root: Path) -> list[str]:
             for ref in record.get(field, []):
                 if not _has_id(records, target, ref):
                     errors.append(f"project {record_id!r} references unknown {target} {ref!r}")
+        extensions = record.get("extensions", {})
+        content_studio = extensions.get("content_studio", {}) if isinstance(extensions, dict) else {}
+        series_layout = content_studio.get("series_layout", {}) if isinstance(content_studio, dict) else {}
+        if isinstance(series_layout, dict) and series_layout.get("layout_variation") == "custom":
+            details = series_layout.get("layout_variation_details")
+            if not isinstance(details, str) or not details.strip():
+                errors.append(f"project {record_id!r} custom series layout variation requires layout_variation_details")
+        character_defaults = content_studio.get("character_visual_defaults", {}) if isinstance(content_studio, dict) else {}
+        female_defaults = character_defaults.get("female_character", {}) if isinstance(character_defaults, dict) else {}
+        if isinstance(female_defaults, dict):
+            age = female_defaults.get("age_years", 18)
+            adult = female_defaults.get("adult", True)
+            if adult is True and isinstance(age, int) and not isinstance(age, bool) and age < 18:
+                errors.append(f"project {record_id!r} cannot mark a female character under 18 as an adult")
     for record_id, record in records["infographic_production"].items():
         if not _has_id(records, "mini_project", record.get("project_id")):
             errors.append(f"infographic production {record_id!r} references an unknown project")
@@ -639,7 +929,25 @@ def validate(root: Path) -> list[str]:
     for record_id, record in records["prompt_resolution"].items():
         if record.get("work_kind") == "infographic" and not _has_id(records, "infographic_production", record.get("work_id")):
             errors.append(f"prompt resolution {record_id!r} references an unknown infographic production")
+    for review_id, record in records["prompt_review"].items():
+        work_id = record.get("work_id")
+        if record.get("work_kind") != "infographic" or not _has_id(records, "infographic_production", work_id):
+            errors.append(f"prompt review {review_id!r} references an unknown infographic production")
+        if isinstance(record.get("status"), str) and record.get("status") in {"selected_pass", "selected_below_threshold"}:
+            resolution_id = record.get("prompt_resolution_id")
+            resolution = records["prompt_resolution"].get(resolution_id) if isinstance(resolution_id, str) else None
+            selected = next((candidate for candidate in record.get("candidates", []) if isinstance(candidate, dict) and candidate.get("id") == record.get("selected_candidate_id")), None)
+            if resolution is None:
+                errors.append(f"prompt review {review_id!r} references an unknown prompt resolution")
+            elif selected is not None and (
+                resolution.get("work_id") != record.get("work_id")
+                or resolution.get("work_kind") != record.get("work_kind")
+                or resolution.get("prompt_sha256") != selected.get("prompt_sha256")
+                or resolution.get("exact_prompt") != selected.get("exact_prompt")
+            ):
+                errors.append(f"prompt review {review_id!r} selected text does not match its prompt resolution")
     asset_versions: set[tuple[str, str]] = set()
+    generation_reviews: dict[str, int] = {}
     for generation_id, record in records["image_generation"].items():
         asset_id = record.get("asset_id")
         asset_version = record.get("asset_version")
@@ -654,9 +962,30 @@ def validate(root: Path) -> list[str]:
             errors.append(f"image generation {generation_id!r} references an unknown prompt resolution")
         elif prompt.get("work_id") != record.get("work_id") or prompt.get("work_kind") != record.get("work_kind"):
             errors.append(f"image generation {generation_id!r} uses a prompt for different work")
+        work_id = record.get("work_id")
+        production = records["infographic_production"].get(work_id) if isinstance(work_id, str) else None
+        project_id = production.get("project_id") if production else None
+        project = records["mini_project"].get(project_id) if isinstance(project_id, str) else None
+        review_id = record.get("prompt_review_id")
+        if project and project.get("prompt_review_required") is True and not isinstance(review_id, str):
+            errors.append(f"image generation {generation_id!r} is missing the required prompt review")
+        if isinstance(review_id, str):
+            review = records["prompt_review"].get(review_id)
+            if review is None:
+                errors.append(f"image generation {generation_id!r} references an unknown prompt review")
+            elif (
+                review.get("status") != "selected_pass"
+                or review.get("work_id") != record.get("work_id")
+                or review.get("prompt_resolution_id") != record.get("prompt_resolution_id")
+            ):
+                errors.append(f"image generation {generation_id!r} requires a passing, matching prompt review")
+            generation_reviews[review_id] = generation_reviews.get(review_id, 0) + 1
         superseded = record.get("supersedes_generation_id")
         if superseded and (not _has_id(records, "image_generation", superseded) or records["image_generation"][superseded].get("asset_id") != record.get("asset_id")):
             errors.append(f"image generation {generation_id!r} supersedes an unknown or different asset")
+    for review_id, count in generation_reviews.items():
+        if count > 1:
+            errors.append(f"prompt review {review_id!r} is linked to more than one image generation")
     derivative_paths = {path.stem: path for path, _schema_path, name in _record_specs(root) if name == "image_derivative"}
     for derivative_id, record in records["image_derivative"].items():
         derivative_path = derivative_paths.get(derivative_id)

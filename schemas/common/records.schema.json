@@ -70,9 +70,19 @@
         "work_id": { "$ref": "#/$defs/id" },
         "work_kind": { "type": "string", "minLength": 1 },
         "prompt_resolution_id": { "$ref": "#/$defs/id" },
+        "prompt_review_id": { "$ref": "#/$defs/id" },
         "provider": { "type": "string", "minLength": 1 },
         "model": { "type": "string" },
         "provider_job_id": { "type": "string" },
+        "generation_arguments": {
+          "type": "object", "required": ["source_path", "source_sha256", "values"],
+          "properties": {
+            "source_path": { "type": "string", "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$)).+" },
+            "source_sha256": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+            "values": { "type": "object" }
+          },
+          "additionalProperties": false
+        },
         "generated_at": { "type": "string", "minLength": 1 },
         "source_path": { "type": "string", "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$)).+" },
         "source_sha256": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },

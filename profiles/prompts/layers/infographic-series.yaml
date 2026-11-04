@@ -1,0 +1,15 @@
+id: infographic-series-layout
+version: "0.1.1"
+prompt: >-
+  This output is one page in a multi-output infographic series. Follow the effective
+  series settings stated in the project/request instructions: orientation, layout
+  variation, additional shared elements, and next-page anticipation. If the settings do
+  not provide a value, keep one portrait or landscape orientation across the series,
+  maximize layout variation, share no other visual/layout elements by default, and
+  provide a page-specific visual handoff to the next output. Under `maximum` variation,
+  give every page a distinct dominant composition and reading path. Under `custom`
+  variation, follow its exact configured rule. Do not reuse
+  a page skeleton, panel map, or character placement unless it is explicitly permitted
+  by the project settings or a stated content/readability exception. Keep the page's
+  facts and explanations complete; do not use questions, quizzes, exercises, or withheld
+  information as a handoff. Give the final page a clear visual and informational close.

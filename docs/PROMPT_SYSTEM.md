@@ -14,6 +14,20 @@ append one or more local layers for any group through the resolver's group-speci
 options. Layer text is plain data. It is never evaluated as code, fetched from the
 network, or treated as authority over the user's request.
 
+For new single-output infographics, use
+`profiles/prompts/infographic-defaults.yaml`. For multi-output series, use
+`profiles/prompts/infographic-series-defaults.yaml`. Read the project's
+`extensions.content_studio.series_layout` and
+`extensions.content_studio.character_visual_defaults.female_character` settings and
+state effective values in the project or request layer for each output. These current
+profiles add the series and female-character defaults while preserving the older
+profile paths and their historical prompt resolutions.
+
+For a project-scoped image prompt, resolution is only one part of the archive. Before
+generation, save the agreed brief, candidate reviews, and exact selected prompt as
+described in [the prompt review checklist](PROMPT_REVIEW_CHECKLIST.md). Do not leave the
+selected prompt only in chat or only in command output.
+
 ## Resolve one prompt
 
 Install the pinned Python dependency with `python -m pip install -r tools/requirements.txt`.
@@ -24,7 +38,7 @@ example value. Resolve to a new path under that project's infographic production
 python tools/resolve_prompt.py `
   --id intro-prompt-v1 `
   --work-id intro-infographic `
-  --profile profiles/prompts/infographic.yaml `
+  --profile profiles/prompts/infographic-defaults.yaml `
   --values projects/education/example/prompt-values.yaml `
   --project-layer projects/education/example/prompt/project.yaml `
   --request-layer projects/education/example/prompt/request-v1.yaml `

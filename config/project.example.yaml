@@ -13,3 +13,28 @@ knowledge_refs: []
 character_refs: []
 item_refs: []
 production_refs: []
+prompt_review_required: true
+extensions:
+  content_studio:
+    series_layout:
+      orientation: portrait
+      layout_variation: maximum
+      additional_shared_elements: []
+      next_page_anticipation: required
+    character_visual_defaults:
+      female_character:
+        age_years: 18
+        adult: true
+        presentation: "18-year-old adult female university student; neat, refined, elegant, and beautiful"
+        default_outfit: dress_or_one_piece
+        pants_allowed_contexts:
+          - uniform
+          - fieldwork
+          - special_attire
+        outerwear_allowed_contexts:
+          - uniform
+          - fieldwork
+          - special_attire
+        open_front_outerwear_with_above_knee_skirt: true
+        summer_short_sleeve_target_fraction: 0.33
+        swimming_outfit_default: one_piece_competitive_swimsuit

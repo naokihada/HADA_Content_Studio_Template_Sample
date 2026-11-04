@@ -10,5 +10,9 @@ metadata checks, and post-publication records. The raw generated references and 
 prompt sidecars remain local. Exported images are still marked for human review; this
 Sample does not upload or claim to publish them.
 
+Read the project-root `WHY.md` before significant work. When the owner states or adopts
+a durable reason, run `python tools/record_why.py --root PROJECT_ROOT` to append it
+without replacing earlier entries.
+
 Run python tools/validate.py and python tools/catalog.py from this directory.
 See docs/ASSET_LIFECYCLE.md before using any image outside the local project.

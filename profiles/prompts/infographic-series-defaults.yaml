@@ -1,0 +1,12 @@
+schema_version: "0.1.0"
+id: infographic-series-defaults
+version: "0.1.1"
+layers:
+  shared:
+    - profiles/prompts/layers/shared.yaml
+  domain:
+    - profiles/prompts/layers/domain-general.yaml
+  medium:
+    - profiles/prompts/layers/infographic.yaml
+    - profiles/prompts/layers/female-character-visuals.yaml
+    - profiles/prompts/layers/infographic-series.yaml

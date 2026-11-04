@@ -31,6 +31,18 @@ Generation records under `assets/generations/<generation-id>/` link the source h
 review decision, and exact prompt resolution. Use a new asset version for every new
 accepted source; existing sources and records are never overwritten.
 
+Projects with `prompt_review_required: true` must also pass the selected review ID
+through `--prompt-review-id`. The review must be complete and its selected prompt hash
+must match the resolution. Only a `selected_pass` review (90 points or higher with all
+critical checks passing) authorizes image intake; a below-threshold review is retained
+for audit and cannot be used to generate or intake an image.
+Legacy projects without this setting may retain generations that predate prompt review.
+
+When the image service exposes non-secret generation options, save them as a project-
+relative YAML mapping and pass its path with `--generation-arguments-file`. Intake
+embeds those values and their file path/hash in the generation record. Never store API
+keys, tokens, or credentials in the argument file.
+
 ## 2. Make a destination derivative
 
 Only an accepted master can be exported. The tool always re-encodes it, applies the

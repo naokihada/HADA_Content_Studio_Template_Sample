@@ -3,12 +3,12 @@
   "template": {
     "id": "hada-content-studio-template",
     "name": "HADA Content Studio Template",
-    "version": "0.1.0"
+    "version": "0.1.1"
   },
   "base_compatibility": {
     "template_id": "hada-base-template",
     "minimum_version": "0.1.0",
-    "tested_version": "0.1.0"
+    "tested_version": "0.1.1"
   },
   "compatibility": {
     "schema_version": "0.1.0",

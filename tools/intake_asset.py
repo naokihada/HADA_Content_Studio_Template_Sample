@@ -58,6 +58,56 @@ def _find_prompt_resolution(root: Path, prompt_id: str) -> dict[str, Any]:
     return matches[0]
 
 
+def _find_prompt_review(root: Path, review_id: str) -> dict[str, Any]:
+    matches = []
+    for path in root.glob("projects/**/productions/infographic/prompts/*.prompt-review.yaml"):
+        if not path.is_file() or yaml is None:
+            continue
+        record = yaml.safe_load(path.read_text(encoding="utf-8"))
+        if isinstance(record, dict) and record.get("id") == review_id:
+            matches.append(record)
+    if len(matches) != 1:
+        raise ValueError(f"expected exactly one prompt review with ID {review_id!r}")
+    return matches[0]
+
+
+def _find_project(root: Path, project_id: str) -> dict[str, Any]:
+    matches = []
+    for path in root.glob("projects/**/project.yaml"):
+        if not path.is_file() or yaml is None:
+            continue
+        record = yaml.safe_load(path.read_text(encoding="utf-8"))
+        if isinstance(record, dict) and record.get("id") == project_id:
+            matches.append(record)
+    if len(matches) != 1:
+        raise ValueError(f"expected exactly one mini-project with ID {project_id!r}")
+    return matches[0]
+
+
+def _load_generation_arguments(root: Path, relative_path: str) -> dict[str, Any]:
+    source_ref = Path(relative_path)
+    if not relative_path or source_ref.is_absolute() or ".." in source_ref.parts or yaml is None:
+        raise ValueError("generation-arguments file must be a project-relative YAML path")
+    source_path = (root / source_ref).resolve()
+    try:
+        source_path.relative_to(root.resolve())
+    except ValueError as exc:
+        raise ValueError("generation-arguments file resolves outside the project root") from exc
+    if not source_path.is_file():
+        raise FileNotFoundError(f"generation-arguments file not found: {relative_path}")
+    try:
+        values = yaml.safe_load(source_path.read_text(encoding="utf-8"))
+    except (UnicodeError, yaml.YAMLError) as exc:
+        raise ValueError(f"cannot read generation-arguments file: {exc}") from exc
+    if not isinstance(values, dict):
+        raise ValueError("generation-arguments YAML root must be a mapping")
+    return {
+        "source_path": source_ref.as_posix(),
+        "source_sha256": _digest(source_path),
+        "values": values,
+    }
+
+
 def intake_image(
     root: Path,
     *,
@@ -66,6 +116,8 @@ def intake_image(
     asset_id: str,
     asset_version: str,
     prompt_resolution_id: str,
+    prompt_review_id: str | None = None,
+    generation_arguments_file: str | None = None,
     provider: str,
     generated_at: str,
     disposition: str,
@@ -109,8 +161,25 @@ def intake_image(
     prompt = _find_prompt_resolution(root, prompt_resolution_id)
     if prompt.get("status") != "resolved" or prompt.get("work_kind") != "infographic":
         raise ValueError("intake requires a resolved prompt for an infographic production")
-    if prompt.get("work_id") not in {record.get("id") for record in _all_productions(root)}:
+    productions = _all_productions(root)
+    production = next((record for record in productions if record.get("id") == prompt.get("work_id")), None)
+    if production is None:
         raise ValueError("prompt resolution does not reference an existing infographic production")
+    project = _find_project(root, production.get("project_id", ""))
+    if project.get("prompt_review_required") is True and not prompt_review_id:
+        raise ValueError("this project requires --prompt-review-id before image intake")
+    if prompt_review_id:
+        prompt_review = _find_prompt_review(root, prompt_review_id)
+        if (
+            prompt_review.get("status") != "selected_pass"
+            or prompt_review.get("work_id") != prompt.get("work_id")
+            or prompt_review.get("prompt_resolution_id") != prompt_resolution_id
+        ):
+            raise ValueError("image intake requires a passing prompt review that matches this resolved prompt and production")
+        chosen = next((item for item in prompt_review.get("candidates", []) if isinstance(item, dict) and item.get("id") == prompt_review.get("selected_candidate_id")), None)
+        if chosen is None or chosen.get("prompt_sha256") != prompt.get("prompt_sha256"):
+            raise ValueError("selected prompt review candidate does not match the resolved prompt")
+    generation_arguments = _load_generation_arguments(root, generation_arguments_file) if generation_arguments_file else None
 
     folder = "masters" if disposition == "accepted" else "discard_candidates"
     relative_source = Path("assets") / folder / asset_id / asset_version / f"source{suffix}"
@@ -143,6 +212,10 @@ def intake_image(
         "reviewer": reviewer.strip(),
         "reviewed_at": reviewed_at.strip(),
     }
+    if prompt_review_id:
+        record["prompt_review_id"] = prompt_review_id
+    if generation_arguments:
+        record["generation_arguments"] = generation_arguments
     if model:
         record["model"] = model.strip()
     if provider_job_id:
@@ -186,6 +259,8 @@ def main() -> int:
     parser.add_argument("--asset-id", required=True)
     parser.add_argument("--asset-version", required=True)
     parser.add_argument("--prompt-resolution-id", required=True)
+    parser.add_argument("--prompt-review-id")
+    parser.add_argument("--generation-arguments-file")
     parser.add_argument("--provider", required=True)
     parser.add_argument("--model")
     parser.add_argument("--provider-job-id")
@@ -203,6 +278,8 @@ def main() -> int:
             asset_id=args.asset_id,
             asset_version=args.asset_version,
             prompt_resolution_id=args.prompt_resolution_id,
+            prompt_review_id=args.prompt_review_id,
+            generation_arguments_file=args.generation_arguments_file,
             provider=args.provider,
             generated_at=args.generated_at,
             disposition=args.disposition,

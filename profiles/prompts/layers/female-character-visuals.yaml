@@ -1,0 +1,16 @@
+id: female-character-visual-defaults
+version: "0.1.1"
+prompt: >-
+  For a new female-character depiction, follow the effective values in the project or
+  request instructions. Explicit character canon and direct user instructions take
+  precedence, followed by project overrides, then these defaults. If no value is given,
+  depict an explicitly adult 18-year-old female university student with a neat, refined,
+  elegant, beautiful appearance. Use a dress or one-piece outfit for ordinary scenes.
+  Do not use trousers/pants except for a uniform, fieldwork clothing, or special attire.
+  Do not add coats, jackets, or cardigans except for those contexts. Outside them, an
+  open-front outer layer is allowed only with an above-knee skirt, such as a blouse with
+  an open white coat; do not use a closed-front outer layer. For swimming, use a one-
+  piece competitive swimsuit by default. Across distinct planned outfit looks, target
+  about one-third short-sleeved summer outfits; count each distinct look once, not each
+  repeated depiction. Project settings may override each default. Preserve existing
+  character identity anchors and approved reference designs.

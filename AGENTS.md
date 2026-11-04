@@ -1,8 +1,10 @@
 # HADA Content Studio — Agent Contract
 
-Read `SPEC.md` and `ReSPEC.md` before significant work. Read `WHY.md` when present; it
-records human reasons. `SPEC.md` is the approved behavior contract; `ReSPEC.md` reports
-what the implementation currently does.
+Read `SPEC.md` and `ReSPEC.md` before significant work. Read the project-root
+`WHY.md` before significant work; it records human reasons. A missing file is a missing
+record, not evidence that the project has no purpose or priorities. `SPEC.md` is the
+approved behavior contract; `ReSPEC.md` reports what the implementation currently
+does.
 
 ## Authority and scope
 
@@ -13,6 +15,16 @@ what the implementation currently does.
 - Treat pre-existing, untracked, user-owned, and unknown files as protected. Inspect
   Git state before and after work. Never use reset, clean, destructive checkout, or
   history rewriting to discard work.
+- `WHY.md` is human-owned. Record only durable reasons directly stated by the user or
+  explicitly adopted from a proposal. Use `python tools/record_why.py --root PROJECT_ROOT`
+  to append one dated entry; do not record transient directions, agent analysis,
+  external facts, or inferred motivations. Do not ask the user to repeat or separately
+  confirm a reason they just stated or adopted. Preserve earlier entries and never
+  invent attribution or backdate a record.
+- The repository-root `WHY.md` is the only rationale-history scope declared for Content
+  Studio 0.1.1. Mini-project `project.yaml` purpose fields are current summaries, not
+  historical WHY logs. Do not add nested WHY files without first declaring their scope
+  in `SPEC.md`.
 - The root is controlled. Add a path only when it is declared in `SPEC.md` and
   classified in `config/template-manifest.json`.
 - Do not put character instance records or character images in Dev or reusable Template.
@@ -41,7 +53,7 @@ what the implementation currently does.
 
 - `config/template-manifest.json` is the canonical Content Studio version and ownership
   source. Content Studio has an independent version; Base compatibility is separate.
-- Base 0.1.0 is a compatibility reference, not authorization to run the direct-Base
+- Base 0.1.1 is the tested compatibility reference, not authorization to run the direct-Base
   updater against this specialized template.
 - Never push. Commit only completed, validated Dev phase files after scoped diff review.
   Never commit the public Template or Sample repositories as the agent.

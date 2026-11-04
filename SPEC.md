@@ -1,10 +1,10 @@
 # HADA Content Studio Template — Master Specification
 
 **Specification status:** Approved implementation plan
-**Specification version:** 0.1.0
-**Template version:** 0.1.0
-**Base compatibility:** minimum 0.1.0; tested 0.1.0
-**Status date:** 2026-11-02
+**Specification version:** 0.1.1
+**Template version:** 0.1.1
+**Base compatibility:** minimum 0.1.0; tested 0.1.1
+**Status date:** 2026-11-03
 **Scope:** Content Studio Dev, reusable Template, and local Sample artifacts.
 
 ## 1. Purpose
@@ -36,7 +36,7 @@ Goals:
   the selected destination profile and metadata checks.
 - Keep the initial production module limited to infographics.
 
-Non-goals for 0.1.0:
+Non-goals for 0.1.1:
 
 - Presentation, social carousel authoring, video, songs, animation, long-form fiction,
   Story continuity, or editing-software integration.
@@ -49,8 +49,9 @@ Non-goals for 0.1.0:
 ## 3. Base relationship and versioning
 
 This is a specialized template with its own identity and version. `config/template-manifest.json`
-is the source for `hada-content-studio-template` version `0.1.0`; Base compatibility is
-separate and records minimum/tested Base version `0.1.0`. Schema and content-data
+is the source for `hada-content-studio-template` version `0.1.1`; Base compatibility is
+separate and records minimum Base version `0.1.0` and tested Base version `0.1.1`.
+Schema and content-data
 versions are independent. The Base direct-template updater is not assumed to update
 this specialized template.
 
@@ -72,12 +73,45 @@ local Sample to name its one fictional character.
 Pre-existing user-owned files are preserved. Public artifact preparation never copies
 Dev WHY history, AI logs, personal data, secrets, or unapproved raw masters.
 
+### 4.1 WHY lifecycle
+
+`WHY.md` is the human-owned, append-only-in-intent record of durable reasons, values,
+priorities, and changes of mind. Before significant work, read the project-root
+`WHY.md`. A missing file is a missing record, not evidence that the project has no
+purpose or priorities.
+
+When the project owner directly states a durable reason or explicitly adopts a proposed
+reason, record it in the project-root `WHY.md`. Do not record transient task directions,
+agent analysis, external facts, or inferred motivations. Do not ask the owner to repeat
+or separately confirm a reason they just stated or adopted. If no reason was stated or
+adopted, do not create content on the owner's behalf.
+
+Use `python tools/record_why.py --root PROJECT_ROOT` to enter and append one reason.
+The tool uses the local date, preserves existing content, and creates a generic WHY
+placeholder only when the file is missing and nonblank reason text was supplied. Blank
+input makes no change. It refuses a symlink or non-file `WHY.md`. The owner may also
+edit the file directly. Preserve the owner's wording and do not invent supporting
+details, attribution, or historical dates.
+
+Record a change of mind as a new dated entry explaining what changed and what prior
+direction it supersedes; keep the earlier entry. Record factual corrections as dated
+clarifications that refer to the earlier entry. The repository-root `WHY.md` is the
+only rationale-history scope declared by Content Studio 0.1.1. Mini-project
+`project.yaml` purpose fields remain concise current descriptions, not historical WHY
+logs. Do not create nested WHY files unless a future SPEC explicitly declares their
+scope and lifecycle.
+
+Dev retains its real project history. Reusable Template and Sample must each include a
+generic purpose-only WHY placeholder; neither may contain Dev's private rationale or
+invented sample motivation. Existing consumer WHY files remain user-owned and are
+never overwritten by a template update.
+
 ## 5. Portable Studio Core
 
 Core entities use stable IDs, explicit schema versions, source/rights metadata, and
 forward-compatible optional extensions. Markdown is the human-readable content format;
 small YAML/JSON records hold relationships and machine-checked fields. A database is
-not required for 0.1.0.
+not required for 0.1.1.
 
 ### 5.1 Character and item model
 
@@ -260,6 +294,11 @@ metadata scanner failure behavior, deterministic repeated hashes, and publicatio
 records that resolve only to verified derivatives. Prompt checks include
 deterministic layer ordering, required substitution handling, unresolved placeholder
 rejection, layer and reference hash verification, and exact-prompt hash verification.
+
+All artifact roles include `tools/record_why.py` and a root `WHY.md`. Static review
+confirms that the recorder appends only explicit input, preserves prior text, does
+nothing on blank input, refuses unsafe WHY targets, and performs no network or Git
+operations. Dev WHY history must not appear in Template or Sample.
 
 Tests use synthetic fixtures only and do not invoke image-generation services. Image
 generation itself is recorded as external and non-deterministic. Export verification
