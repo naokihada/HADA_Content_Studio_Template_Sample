@@ -47,3 +47,20 @@
 - **Completed:** Conflict-free template-owned changes were merged and missing declared policy/profile files were added. The historical `profiles/prompts/infographic.yaml` and `profiles/prompts/layers/infographic.yaml` files remain unchanged because existing prompt-resolution records reference their hashes. Sample README, WHY, character data, assets, prompt records, and generation provenance were preserved.
 - **Validation:** `python -B tools/validate.py` and `git diff --check` pass. Unit tests were not run.
 - **Boundary:** No release commit, tag, or push was made.
+
+## Post-commit reconciliation — 2026-11-04
+
+- The user-authored `17be11f` v0.1.1 commit is preserved. Three shared policy files have post-commit working-tree reconciliations to current Dev; they remain uncommitted.
+- The Sample manifest retains `role: sample` and `Cute Elf Girl`. The historical infographic profile and layer remain byte-for-byte intact for existing prompt-resolution hashes. Sample README, WHY, assets, character data, prompt records, and generation provenance remain preserved.
+- All other declared template-owned files match Dev, except for the Sample README and the two historical prompt files above.
+- **Validation:** `python -B tools/validate.py` and `git diff --check` pass. Unit tests were not run.
+- **Release boundary:** Include the three current working-tree policy reconciliations in the final release snapshot before tagging. No new commit, tag, or push was made by the agent.
+
+## Final v0.1.1 pre-push check — 2026-11-04
+
+This status supersedes the earlier pending-reconciliation notes.
+
+- The current Sample working tree remains version `0.1.1`, role `sample`, with `Cute Elf Girl` retained.
+- The three post-commit policy reconciliations are ready to include. All declared template-owned files match Dev except the Sample README, manifest, ReSPEC, WHY, and the two preserved historical infographic profile/layer files.
+- Historical prompt-resolution hashes, character data, assets, and generation provenance remain intact. `python -B tools/validate.py` and `git diff --check` pass. Unit tests were not run.
+- No `v0.1.1` tag was created; no push was made by the agent.
